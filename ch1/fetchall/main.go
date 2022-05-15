@@ -13,6 +13,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 )
 
@@ -20,7 +21,9 @@ func main() {
 	start := time.Now()
 	ch := make(chan string)
 	for _, url := range os.Args[1:] {
-		go fetch(url, ch) // start a goroutine
+		for i := 0; i < 2; i++{
+			go fetch(url, ch) // start a goroutine
+		}
 	}
 	for range os.Args[1:] {
 		fmt.Println(<-ch) // receive from channel ch
@@ -29,6 +32,10 @@ func main() {
 }
 
 func fetch(url string, ch chan<- string) {
+	prefix := "http://"
+	if !strings.HasPrefix(url, prefix) {
+		url = prefix + url
+	}
 	start := time.Now()
 	resp, err := http.Get(url)
 	if err != nil {
